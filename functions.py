@@ -74,17 +74,23 @@ def numeric_categorical_analysis(df, user_types):
 
     for cat_col in categorical_cols:
         for num_col in numeric_cols:
-            if len(df[cat_col]) >= 8:
-                contingency_table = pd.crosstab(df[cat_col], df[num_col])
-                chi2, p, _, _ = stats.chi2_contingency(contingency_table)
-                fig = px.imshow(contingency_table, text_auto=True, color_continuous_scale="blues")
-                results.append({
-                    'cat_col': cat_col,
-                    'num_col': num_col,
-                    'test': p,
-                    'p_value': p,
-                    'fig': fig
-                })
+            # Create groups for ANOVA
+            groups = [group for _, group in df.groupby(cat_col)[num_col]]
+            
+            # Perform one-way ANOVA
+            f_stat, p_value = stats.f_oneway(*groups)
+            
+            # Create box plot
+            fig = px.box(df, x=cat_col, y=num_col, 
+                        title=f'Distribution of {num_col} by {cat_col}')
+            
+            results.append({
+                'cat_col': cat_col,
+                'num_col': num_col,
+                'test': 'ANOVA',
+                'p_value': p_value,
+                'fig': fig
+            })
     return results
 
 def categorical_categorical_analysis(df, categorical_cols):
