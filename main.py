@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 from functions import (
     infer_column_types, descriptive_statistics, analyze_numeric_columns, 
     analyze_categorical_columns, analyze_datetime_columns, correlation_analysis, 
@@ -115,7 +116,13 @@ if uploaded_file is not None:
                             st.write(f"{col1} & {col2}: {corr:.2f}")
                             fig = px.scatter(df, x=col1, y=col2, labels={'x': col1, 'y': col2})
                             st.plotly_chart(fig)
-
+                    
+                    st.write("### All Numeric Relationships")
+                    for i, col1 in enumerate(correlation_cols):
+                        for col2 in correlation_cols[i+1:]:
+                            fig = px.scatter(df, x=col1, y=col2, labels={'x': col1, 'y': col2})
+                            st.plotly_chart(fig)
+                            
             if show_num_cat:
                 num_cat_results = numeric_categorical_analysis(df, user_types)
                 for res in num_cat_results:
