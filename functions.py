@@ -69,30 +69,22 @@ def correlation_analysis(df, correlation_cols, ordinal_columns):
 
 def numeric_categorical_analysis(df, user_types):
     results = []
-    for cat_col in [col for col, col_type in user_types.items() if col_type == "Categorical"]:
-        for num_col in [col for col, col_type in user_types.items() if col_type in ["Numeric", "Ordinal"]]:
-            fig = px.box(df, x=cat_col, y=num_col)
-            
-            groups = df.groupby(cat_col)[num_col]
-            normal_distribution = all(stats.normaltest(group)[1] >= 0.01 for name, group in groups)
-            
-            if normal_distribution:
-                f_stat, p_value = stats.f_oneway(*[group for name, group in groups])
-                test_type = "ANOVA"
-                metric = groups.mean().mean()
-            else:
-                h_stat, p_value = stats.kruskal(*[group for name, group in groups])
-                test_type = "Kruskal-Wallis"
-                metric = groups.median().median()
-            
-            results.append({
-                'cat_col': cat_col,
-                'num_col': num_col,
-                'test': test_type,
-                'p_value': p_value,
-                'metric': metric,
-                'fig': fig
-            })
+    numeric_cols = [col for col, col_type in user_types.items() if col_type == "Numeric"]
+    categorical_cols = [col for col, col_type in user_types.items() if col_type == "Categorical"]
+
+    for cat_col in categorical_cols:
+        for num_col in numeric_cols:
+            if len(df[cat_col]) >= 8:
+                contingency_table = pd.crosstab(df[cat_col], df[num_col])
+                chi2, p, _, _ = stats.chi2_contingency(contingency_table)
+                fig = px.imshow(contingency_table, text_auto=True, color_continuous_scale="blues")
+                results.append({
+                    'cat_col': cat_col,
+                    'num_col': num_col,
+                    'test': p,
+                    'p_value': p,
+                    'fig': fig
+                })
     return results
 
 def categorical_categorical_analysis(df, categorical_cols):
@@ -109,3 +101,4 @@ def categorical_categorical_analysis(df, categorical_cols):
                 'fig': fig
             })
     return results
+

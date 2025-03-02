@@ -102,6 +102,7 @@ if uploaded_file is not None:
 
         if st.button("Calculate Relationships"):
             if show_num_num:
+                st.title("Numeric-Numeric Relationships")
                 numeric_cols = [col for col, col_type in user_types.items() if col_type == "Numeric"]
                 ordinal_cols = [col for col in ordinal_columns.keys()]
                 correlation_cols = numeric_cols + ordinal_cols
@@ -123,15 +124,21 @@ if uploaded_file is not None:
                             fig = px.scatter(df, x=col1, y=col2, labels={'x': col1, 'y': col2})
                             st.plotly_chart(fig)
                             
+
+
             if show_num_cat:
                 num_cat_results = numeric_categorical_analysis(df, user_types)
+                st.title("Numeric-Categorical Relationships")
                 for res in num_cat_results:
-                    st.write(f"{res['cat_col']} - {res['num_col']}: {res['test']}, p-value = {res['p_value']:.4f}")
+                    st.write(f"{res['num_col']} - {res['cat_col']}: {res['test']}, p-value = {res['p_value']:.4f}")
                     st.plotly_chart(res["fig"])
+
+
 
             if show_cat_cat:
                 categorical_cols = [col for col, col_type in user_types.items() if col_type == "Categorical"]
                 cat_cat_results = categorical_categorical_analysis(df, categorical_cols)
+                st.title("Categorical-Categorical Relationships")
                 for res in cat_cat_results:
                     st.write(f"{res['col1']} & {res['col2']}: p-value = {res['p_value']:.4f}")
                     st.plotly_chart(res["fig"])
